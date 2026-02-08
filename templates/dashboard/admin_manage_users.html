@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Manage Users | Weather App Management System{% endblock %}
+
+{% block content %}
+  <section class="panel">
+    <div class="panel-header">
+      <h2>Manage Users</h2>
+      <a class="btn ghost" href="{% url 'admin_dashboard' %}">Back to Dashboard</a>
+    </div>
+    <div class="table users">
+      <div class="table-row table-head users">
+        <span>ID</span>
+        <span>Username</span>
+        <span>Email</span>
+        <span>Role</span>
+        <span>Status</span>
+        <span>Joined</span>
+        <span>Actions</span>
+      </div>
+      {% for user in users %}
+        <div class="table-row users">
+          <span>{{ user.id }}</span>
+          <span>{{ user.username }}</span>
+          <span>{{ user.email }}</span>
+          <span>
+            <span class="pill">{{ user.is_staff|yesno:"admin,user" }}</span>
+          </span>
+          <span>
+            <span class="pill">{{ user.is_active|yesno:"Active,Inactive" }}</span>
+          </span>
+          <span>{{ user.date_joined|date:"M d, Y" }}</span>
+          <span class="table-actions">
+            <a class="icon-btn" href="{% url 'edit_user' user.id %}" aria-label="Edit user">
+              <img src="{% static 'img/icons/edit.svg' %}" alt="Edit" />
+            </a>
+            <form method="post" action="{% url 'toggle_user_active' user.id %}">
+              {% csrf_token %}
+              <button class="icon-btn" type="submit" aria-label="Toggle user">
+                {% if user.is_active %}
+                  <img src="{% static 'img/icons/toggle-on.svg' %}" alt="Deactivate" />
+                {% else %}
+                  <img src="{% static 'img/icons/toggle-off.svg' %}" alt="Activate" />
+                {% endif %}
+              </button>
+            </form>
+            <form method="post" action="{% url 'delete_user' user.id %}">
+              {% csrf_token %}
+              <button class="icon-btn" type="submit" aria-label="Delete user">
+                <img src="{% static 'img/icons/delete.svg' %}" alt="Delete" />
+              </button>
+            </form>
+          </span>
+        </div>
+      {% empty %}
+        <p class="muted">No users yet.</p>
+      {% endfor %}
+    </div>
+  </section>
+{% endblock %}

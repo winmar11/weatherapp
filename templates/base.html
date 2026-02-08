@@ -1,0 +1,51 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <title>{% block title %}Weather App Management System{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/app.css' %}" />
+  </head>
+  <body data-weather="{% block weather_key %}default{% endblock %}">
+    <div class="page">
+      {% block topbar %}
+      <header class="topbar">
+        <div class="brand">
+         
+         
+        </div>
+      
+        <nav class="topbar-actions">
+          {% if user.is_authenticated %}
+            <span class="user-chip">{{ user.username }}</span>
+            <a class="btn ghost" href="{% url 'logout' %}">Logout</a>
+          {% else %}
+            <a class="btn ghost" href="{% url 'login' %}">Login</a>
+          {% endif %}
+        </nav>
+      </header>
+      {% endblock %}
+
+      {% if messages %}
+        <div class="messages toast">
+          {% for message in messages %}
+            <div class="message {{ message.tags }}">{{ message }}</div>
+          {% endfor %}
+        </div>
+      {% endif %}
+
+      <main class="content">
+        {% block content %}{% endblock %}
+      </main>
+      <footer class="footer">
+        &copy; 2026 Weather App System. Powered by OpenWeatherMap API. Built with Django.
+      </footer>
+    </div>
+
+    <script src="{% static 'js/app.js' %}"></script>
+  </body>
+</html>

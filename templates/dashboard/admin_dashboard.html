@@ -1,0 +1,268 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Weather App</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/admin_dashboard.css' %}">
+</head>
+<body>
+    
+
+   <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+                </svg>
+                <span class="logo-text">Weather Forecast</span>
+            </div>
+        </div>
+
+
+        <nav class="sidebar-nav">
+            <a href="{% url 'admin_dashboard' %}" class="nav-item active">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <rect x="3" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="3" width="7" height="7"></rect>
+                    <rect x="14" y="14" width="7" height="7"></rect>
+                    <rect x="3" y="14" width="7" height="7"></rect>
+                </svg>
+                Dashboard
+            </a>
+            <a href="{% url 'manage_users' %}" class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                </svg>
+                Manage Users
+            </a>
+            <a href="{% url 'search_history' %}" class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                Search History
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="user-profile">
+                <div class="user-avatar">{{ user.username|slice:":1"|upper }}</div>
+                <div class="user-info">
+                    <div class="user-name">{{ user.username }}</div>
+                    <div class="user-email">Administrator</div>
+                </div>
+            </div>
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="logout-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                    </svg>
+                    Logout
+                </button>
+            </form>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="dashboard-header">
+            <div class="header-content">
+                <div>
+                    <h1 class="page-title">Weather Analytics Dashboard</h1>
+                    <p class="page-subtitle">Welcome back! Here's what's happening today</p>
+                </div>
+            </div>
+        </header>
+
+        <section class="stats-grid">
+            <div class="stat-card searches fade-in-up">
+                <div class="stat-header">
+                    <div class="stat-icon search">
+                        <img src="{% static 'img/icons/search.svg' %}" alt="Searches">
+                    </div>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-label">Total Searches</div>
+                    <div class="stat-value" id="totalSearches">0</div>
+                    <div class="stat-sublabel">All time queries</div>
+                </div>
+            </div>
+
+            <div class="stat-card cities fade-in-up">
+                <div class="stat-header">
+                    <div class="stat-icon location">
+                        <img src="{% static 'img/icons/location.svg' %}" alt="Cities">
+                    </div>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-label">Unique Cities</div>
+                    <div class="stat-value" id="uniqueCities">0</div>
+                    <div class="stat-sublabel">Different locations</div>
+                </div>
+            </div>
+
+            <div class="stat-card today fade-in-up">
+                <div class="stat-header">
+                    <div class="stat-icon today">
+                        <img src="{% static 'img/icons/chart.svg' %}" alt="Today">
+                    </div>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-label">Today's Searches</div>
+                    <div class="stat-value" id="todaySearches">0</div>
+                    <div class="stat-sublabel">Last 24 hours</div>
+                </div>
+            </div>
+
+            <div class="stat-card users fade-in-up">
+                <div class="stat-header">
+                    <div class="stat-icon user">
+                        <img src="{% static 'img/icons/users.svg' %}" alt="Users">
+                    </div>
+                </div>
+                <div class="stat-content">
+                    <div class="stat-label">Total Users</div>
+                    <div class="stat-value" id="activeUsers">0</div>
+                    <div class="stat-sublabel">Registered accounts</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="chart-section">
+            <div class="section-header">
+                <h2 class="section-title">Search Analytics</h2>
+                <span class="section-subtitle">Last 7 days performance</span>
+            </div>
+            <canvas id="analyticsChart" height="80"></canvas>
+        </section>
+
+        <section class="data-section">
+            <div class="section-header">
+                <h2 class="section-title">Most Searched Cities</h2>
+                <span class="section-subtitle">Top locations by search volume</span>
+            </div>
+            <div class="cities-grid">
+                {% for row in most_searched %}
+                <div class="city-card">
+                    <div class="city-rank">{{ forloop.counter }}</div>
+                    <div class="city-name">{{ row.city }}</div>
+                    <div class="city-searches">{{ row.total }} searches</div>
+                </div>
+                {% empty %}
+                <div class="text-center opacity-50">
+                    <p>No searches yet.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section class="data-section">
+            <div class="section-header">
+                <h2 class="section-title">Recent Activity</h2>
+                <span class="section-subtitle">Latest search activities</span>
+            </div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>City</th>
+                        <th>Temperature</th>
+                        <th>Date & Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for search in recent_searches %}
+                    <tr>
+                        <td>{{ search.user.username }}</td>
+                        <td>{{ search.city }}</td>
+                        <td>{{ search.temperature_c }}&deg;C</td>
+                        <td>{{ search.searched_at|date:"M d, Y h:i A" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center opacity-50">No activity yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <script>
+        // Data injected from Django
+        const statsData = {
+            totalSearches: {{ total_searches|default:0 }},
+            uniqueCities: {{ unique_cities|default:0 }},
+            todaySearches: {{ todays_searches|default:0 }},
+            activeUsers: {{ total_users|default:0 }}
+        };
+
+        // Counting animation logic
+        function animateValue(id, end, duration) {
+            const element = document.getElementById(id);
+            if (!element) return;
+
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                const current = Math.floor(progress * end);
+                element.textContent = current.toLocaleString();
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        // Loop animation every 6 seconds
+        function runAnimationCycle() {
+            animateValue("totalSearches", statsData.totalSearches, 1500);
+            animateValue("uniqueCities", statsData.uniqueCities, 1500);
+            animateValue("todaySearches", statsData.todaySearches, 1500);
+            animateValue("activeUsers", statsData.activeUsers, 1500);
+
+            setTimeout(() => {
+                ["totalSearches", "uniqueCities", "todaySearches", "activeUsers"].forEach(id => {
+                    const el = document.getElementById(id);
+                    if(el) el.textContent = "0";
+                });
+                runAnimationCycle();
+            }, 6000);
+        }
+
+        // Initialize Chart
+        const ctx = document.getElementById('analyticsChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: [{% for d in chart_labels %}'{{ d }}'{% if not forloop.last %},{% endif %}{% endfor %}],
+                datasets: [{
+                    label: 'Searches',
+                    data: [{% for v in chart_values %}{{ v }}{% if not forloop.last %},{% endif %}{% endfor %}],
+                    borderColor: '#00d4ff',
+                    backgroundColor: 'rgba(0, 212, 255, 0.1)',
+                    borderWidth: 3,
+                    tension: 0.4,
+                    fill: true,
+                    pointRadius: 4,
+                    pointBackgroundColor: '#00d4ff'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#94a3b8' } },
+                    x: { grid: { display: false }, ticks: { color: '#94a3b8' } }
+                }
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', runAnimationCycle);
+    </script>
+</body>
+</html>

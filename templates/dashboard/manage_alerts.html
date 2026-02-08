@@ -1,0 +1,269 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Alerts | Weather Forecast</title>
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+</head>
+<body>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+                </svg>
+                <span class="logo-text">Weather Forecast</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="{% url 'dashboard' %}" class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <rect x="3" y="3" width="18" height="18" rx="2"/>
+                    <path d="M3 9h18M9 21V9"/>
+                </svg>
+                <span>Dashboard</span>
+            </a>
+            <a href="{% url 'saved_locations' %}" class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                    <circle cx="12" cy="10" r="3"/>
+                </svg>
+                <span>Saved Locations</span>
+            </a>
+            <a href="{% url 'manage_alerts' %}" class="nav-item active">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+                <span>Weather Alerts</span>
+            </a>
+            <a href="{% url 'settings' %}" class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M12 2v20M2 12h20"/>
+                    <circle cx="12" cy="12" r="10"/>
+                </svg>
+                <span>Settings</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="user-profile">
+                <div class="user-avatar">
+                    {{ request.user.username|slice:":1"|upper }}
+                </div>
+                <div class="user-info">
+                    <div class="user-name">{{ request.user.username }}</div>
+                    <div class="user-email">{{ request.user.email|default:"user@example.com" }}</div>
+                </div>
+            </div>
+            <a href="{% url 'logout' %}" class="logout-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                    <polyline points="16 17 21 12 16 7"/>
+                    <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+                Logout
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="header-content">
+                <div>
+                    <h1 class="page-title">Manage Weather Alerts</h1>
+                    <p class="page-subtitle">Configure alerts for weather conditions</p>
+                </div>
+                <div class="header-actions">
+                    <div class="current-time" id="currentTime"></div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Messages -->
+        {% if messages %}
+            <div class="messages-container" style="margin-bottom: 2rem;">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- Create Alert Section -->
+        <section class="search-section">
+            <div class="search-card">
+                <h2 class="section-title">
+                    <svg class="title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M12 5v14M5 12h14"/>
+                    </svg>
+                    Create New Alert
+                </h2>
+                <p class="section-subtitle">Set up alerts for specific weather conditions</p>
+
+                <form method="post" action="{% url 'create_alert' %}" class="compact-form">
+                    {% csrf_token %}
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="city">City</label><br>
+                            <input type="text" id="city" name="city" placeholder="City name" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="country">Country</label><br>
+                            <input type="text" id="country" name="country" placeholder="Country (optional)">
+                        </div>
+
+                    </div>
+                    <div class="form-options">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="condition_alerts" checked>
+                            <span>Alert on severe weather conditions (thunderstorm, snow, etc.)</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="email_alerts">
+                            <span>Send email notifications</span>
+                        </label>
+                    </div>
+                    <button type="submit" class="submit-btn">Create Alert</button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Existing Alerts -->
+        <section class="forecast-section">
+            <div class="forecast-card">
+                <h2 class="section-title">
+                    <svg class="title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                        <line x1="12" y1="9" x2="12" y2="13"/>
+                        <line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                    Your Weather Alerts
+                </h2>
+                <p class="section-subtitle">Manage your active weather alert configurations</p>
+
+                {% if alerts %}
+                <div class="alert-list">
+                    {% for alert in alerts %}
+                    <div class="alert-item {% if alert.is_active %}active{% endif %}">
+                        <div class="alert-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                                <circle cx="12" cy="10" r="3"/>
+                            </svg>
+                        </div>
+                        <div class="alert-content">
+                            <div class="alert-city">{{ alert.city }}{% if alert.country %}, {{ alert.country }}{% endif %}</div>
+                            <div class="alert-threshold">
+                                {% if alert.temperature_threshold %}
+                                Temperature threshold: {{ alert.temperature_threshold }}°C
+                                {% else %}
+                                Monitoring weather conditions
+                                {% endif %}
+                                {% if alert.condition_alerts %}• Condition alerts enabled{% endif %}
+                                {% if alert.email_alerts %}• Email notifications enabled{% endif %}
+                            </div>
+                            <div class="alert-meta">
+                                Created {{ alert.created_at|date:"M d, Y" }}
+                                {% if alert.last_triggered %}• Last triggered {{ alert.last_triggered|timesince }} ago{% endif %}
+                            </div>
+                        </div>
+                        <div class="alert-status">
+                            {% if alert.is_active %}
+                            <span class="status-badge active">Active</span>
+                            {% else %}
+                            <span class="status-badge inactive">Inactive</span>
+                            {% endif %}
+                        </div>
+                        <div class="alert-actions">
+                            <button class="alert-action-btn" onclick="toggleAlert('{{ alert.id }}')" title="Toggle active/inactive">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <circle cx="12" cy="12" r="1"/>
+                                    <circle cx="12" cy="5" r="1"/>
+                                    <circle cx="12" cy="19" r="1"/>
+                                </svg>
+                            </button>
+                            <button class="alert-action-btn delete-btn" onclick="deleteAlert('{{ alert.id }}')" title="Delete alert">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+                                    <line x1="10" y1="11" x2="10" y2="17"/>
+                                    <line x1="14" y1="11" x2="14" y2="17"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                        <line x1="12" y1="9" x2="12" y2="13"/>
+                        <line x1="12" y1="17" x2="12.01" y2="17"/>
+                    </svg>
+                    <p>No alerts configured yet. Create your first alert above.</p>
+                </div>
+                {% endif %}
+            </div>
+        </section>
+    </main>
+
+
+
+    <script src="{% static 'js/dashboard.js' %}"></script>
+    <script>
+        function toggleAlert(alertId) {
+            if (confirm('Are you sure you want to toggle this alert?')) {
+                // Create a form to submit POST request
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `/alerts/${alertId}/toggle/`;
+
+                // Add CSRF token
+                const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+                if (csrfToken) {
+                    const csrfInput = document.createElement('input');
+                    csrfInput.type = 'hidden';
+                    csrfInput.name = 'csrfmiddlewaretoken';
+                    csrfInput.value = csrfToken.value;
+                    form.appendChild(csrfInput);
+                }
+
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+
+
+
+        function deleteAlert(alertId) {
+            if (confirm('Are you sure you want to delete this alert? This action cannot be undone.')) {
+                // Create a form to submit POST request
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = `/alerts/${alertId}/delete/`;
+
+                // Add CSRF token
+                const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+                if (csrfToken) {
+                    const csrfInput = document.createElement('input');
+                    csrfInput.type = 'hidden';
+                    csrfInput.name = 'csrfmiddlewaretoken';
+                    csrfInput.value = csrfToken.value;
+                    form.appendChild(csrfInput);
+                }
+
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+    </script>
+</body>
+</html>

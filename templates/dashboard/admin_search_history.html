@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Search History | Weather App Management System{% endblock %}
+
+{% block content %}
+  <section class="panel">
+    <div class="panel-header">
+      <h2>All Search History</h2>
+      <div class="header-actions">
+        <form method="post" action="{% url 'clear_search_history' %}">
+          {% csrf_token %}
+          <button class="btn ghost danger" type="submit">Clear All</button>
+        </form>
+        <a class="btn ghost" href="{% url 'admin_dashboard' %}">Back to Dashboard</a>
+      </div>
+    </div>
+    <div class="table history">
+      <div class="table-row table-head history">
+        <span>ID</span>
+        <span>User</span>
+        <span>City</span>
+        <span>Temperature</span>
+        <span>Wind Speed</span>
+        <span>Humidity</span>
+        <span>Date</span>
+        <span>Actions</span>
+      </div>
+      {% for search in searches %}
+        <div class="table-row history">
+          <span>{{ search.id }}</span>
+          <span>{{ search.user.username }}<br><small class="muted">{{ search.user.email }}</small></span>
+          <span>{{ search.city }}</span>
+          <span>{{ search.temperature_c }}&deg;C</span>
+          <span>{% if search.wind_speed_kph %}{{ search.wind_speed_kph }} km/h{% else %}-{% endif %}</span>
+          <span>{% if search.humidity %}{{ search.humidity }}%{% else %}-{% endif %}</span>
+          <span>{{ search.searched_at|date:"M d, Y h:i A" }}</span>
+          <span class="table-actions">
+            <form method="post" action="{% url 'delete_search_admin' search.id %}">
+              {% csrf_token %}
+              <button class="icon-btn" type="submit" aria-label="Delete search">
+                <img src="{% static 'img/icons/delete.svg' %}" alt="Delete" />
+              </button>
+            </form>
+          </span>
+        </div>
+      {% empty %}
+        <p class="muted">No searches yet.</p>
+      {% endfor %}
+    </div>
+  </section>
+{% endblock %}

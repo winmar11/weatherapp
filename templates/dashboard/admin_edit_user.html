@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Edit User | Weather App Management System{% endblock %}
+
+{% block content %}
+  <section class="panel" style="max-width: 520px; margin: 0 auto;">
+    <div class="panel-header">
+      <h2>Edit User</h2>
+      <a class="btn ghost" href="{% url 'manage_users' %}">Back</a>
+    </div>
+    <form method="post" class="form-grid">
+      {% csrf_token %}
+      {{ form.non_field_errors }}
+      <label>
+        Username
+        {{ form.username }}
+      </label>
+      <label>
+        Email
+        {{ form.email }}
+      </label>
+      <label>
+        Staff Role
+        {{ form.is_staff }}
+      </label>
+      <label>
+        Active
+        {{ form.is_active }}
+      </label>
+      <button class="btn primary" type="submit">Save Changes</button>
+    </form>
+  </section>
+{% endblock %}

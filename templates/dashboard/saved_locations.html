@@ -1,0 +1,191 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Saved Locations | Weather Forecast</title>
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+                </svg>
+                <span class="logo-text">Weather Forecast</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="{% url 'dashboard' %}" class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <rect x="3" y="3" width="18" height="18" rx="2"/>
+                    <path d="M3 9h18M9 21V9"/>
+                </svg>
+                <span>Dashboard</span>
+            </a>
+            <a href="{% url 'saved_locations' %}" class="nav-item active">
+                <i class="fas fa-heart nav-icon" style="margin-right: 10px; font-size: 1.1rem;"></i>
+                <span>Saved Locations</span>
+            </a>
+            <a href="{% url 'manage_alerts' %}" class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+                <span>Weather Alerts</span>
+            </a>
+            <a href="{% url 'settings' %}" class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M12 2v20M2 12h20"/><circle cx="12" cy="12" r="10"/>
+                </svg>
+                <span>Settings</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="user-profile">
+                <div class="user-avatar">{{ request.user.username|slice:":1"|upper }}</div>
+                <div class="user-info">
+                    <div class="user-name">{{ request.user.username }}</div>
+                    <div class="user-email">{{ request.user.email|default:"user@example.com" }}</div>
+                </div>
+            </div>
+            <a href="{% url 'logout' %}" class="logout-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/>
+                </svg>
+                Logout
+            </a>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="dashboard-header">
+            <div class="header-content">
+                <div>
+                    <h1 class="page-title">Saved Locations</h1>
+                    <p class="page-subtitle">Quick access to your favorite weather locations</p>
+                </div>
+                <div class="header-actions">
+                    <div class="current-time" id="currentTime"></div>
+                </div>
+            </div>
+        </header>
+
+        {% if messages %}
+            <div class="messages-container" style="margin-bottom: 2rem;">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">{{ message }}</div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <section class="search-section">
+            <div class="search-card">
+                <h2 class="section-title">
+                    <i class="fas fa-plus-circle" style="color: #2563eb; margin-right: 8px;"></i>
+                    Add New Location
+                </h2>
+                <p class="section-subtitle">Save a city for quick weather access</p>
+
+                <form method="post" action="{% url 'add_saved_location' %}" class="compact-form">
+                    {% csrf_token %}
+                    <div class="form-grid" style="display: flex; gap: 1rem; align-items: flex-end;">
+                        <div class="form-group" style="flex: 1;">
+                            <label for="city" style="display:block; margin-bottom: 5px;">City</label>
+                            <input type="text" id="city" name="city" placeholder="City name" required style="width:100%;">
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label for="country" style="display:block; margin-bottom: 5px;">Country</label>
+                            <input type="text" id="country" name="country" placeholder="Optional" style="width:100%;">
+                        </div>
+                        <button type="submit" class="submit-btn" style="height: 45px; padding: 0 20px;">
+                            <i class="fas fa-heart" style="margin-right: 5px;"></i> Save Location
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <section class="forecast-section">
+            <div class="forecast-card">
+                <h2 class="section-title">
+                    <i class="fas fa-heart" style="color: #ef4444; margin-right: 8px;"></i>
+                    Your Saved Locations
+                </h2>
+                
+                {% if saved_locations %}
+                <div class="locations-grid">
+                    {% for location in saved_locations %}
+                    <div class="location-card">
+                        <div class="location-header">
+                            <div class="location-info">
+                                <h3 class="location-city">{{ location.city }}</h3>
+                                {% if location.country %}
+                                <p class="location-country">{{ location.country }}</p>
+                                {% endif %}
+                            </div>
+                            <div class="location-actions">
+                                <button class="location-action-btn" onclick="checkWeather('{{ location.city }}')" title="Check weather">
+                                    <i class="fas fa-magnifying-glass"></i>
+                                </button>
+                                
+                                <form method="post" action="{% url 'toggle_favorite_location' location.id %}" style="display: inline;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="location-action-btn favorite-btn" 
+                                            onclick="return confirm('Remove {{ location.city }} from your saved locations?')" 
+                                            title="Unfavorite location" 
+                                            style="color: #ef4444;">
+                                        <i class="fas fa-heart"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                        <div class="location-meta">
+                            <span class="location-date">Added {{ location.created_at|date:"M d, Y" }}</span>
+                            {% if location.latitude and location.longitude %}
+                            <span class="location-coords">{{ location.latitude|floatformat:1 }}°N, {{ location.longitude|floatformat:1 }}°E</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <i class="far fa-heart" style="font-size: 3rem; color: var(--text-muted); margin-bottom: 1rem; opacity: 0.5;"></i>
+                    <p>No saved locations yet. Add your favorite cities above.</p>
+                </div>
+                {% endif %}
+            </div>
+        </section>
+    </main>
+
+    <script src="{% static 'js/dashboard.js' %}"></script>
+    <script>
+        function checkWeather(city) {
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '/dashboard/';
+            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]');
+            if (csrfToken) {
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = 'csrfmiddlewaretoken';
+                csrfInput.value = csrfToken.value;
+                form.appendChild(csrfInput);
+            }
+            const cityInput = document.createElement('input');
+            cityInput.type = 'hidden';
+            cityInput.name = 'city';
+            cityInput.value = city;
+            form.appendChild(cityInput);
+            document.body.appendChild(form);
+            form.submit();
+        }
+    </script>
+</body>
+</html>

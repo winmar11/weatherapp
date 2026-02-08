@@ -1,0 +1,187 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings | Weather Forecast</title>
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+</head>
+<body>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/>
+                </svg>
+                <span class="logo-text">Weather Forecast</span>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="{% url 'dashboard' %}" class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <rect x="3" y="3" width="18" height="18" rx="2"/>
+                    <path d="M3 9h18M9 21V9"/>
+                </svg>
+                <span>Dashboard</span>
+            </a>
+            <a href="{% url 'saved_locations' %}" class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                    <circle cx="12" cy="10" r="3"/>
+                </svg>
+                <span>Saved Locations</span>
+            </a>
+            <a href="{% url 'manage_alerts' %}" class="nav-item">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+                <span>Weather Alerts</span>
+            </a>
+            <a href="{% url 'settings' %}" class="nav-item active">
+                <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M12 2v20M2 12h20"/>
+                    <circle cx="12" cy="12" r="10"/>
+                </svg>
+                <span>Settings</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="user-profile">
+                <div class="user-avatar">
+                    {{ request.user.username|slice:":1"|upper }}
+                </div>
+                <div class="user-info">
+                    <div class="user-name">{{ request.user.username }}</div>
+                    <div class="user-email">{{ request.user.email|default:"user@example.com" }}</div>
+                </div>
+            </div>
+            <a href="{% url 'logout' %}" class="logout-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                    <polyline points="16 17 21 12 16 7"/>
+                    <line x1="21" y1="12" x2="9" y2="12"/>
+                </svg>
+                Logout
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="header-content">
+                <div>
+                    <h1 class="page-title">Settings</h1>
+                    <p class="page-subtitle">Customize your weather experience</p>
+                </div>
+                <div class="header-actions">
+                    <div class="current-time" id="currentTime"></div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Messages -->
+        {% if messages %}
+            <div class="messages-container" style="margin-bottom: 2rem;">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        <!-- Settings Form -->
+        <section class="forecast-section">
+            <div class="forecast-card">
+                <h2 class="section-title">
+                    <svg class="title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M12 2v20M2 12h20"/>
+                        <circle cx="12" cy="12" r="10"/>
+                    </svg>
+                    Preferences
+                </h2>
+                <p class="section-subtitle">Configure your weather app settings</p>
+
+                <form method="post" action="{% url 'update_settings' %}" class="settings-form">
+                    {% csrf_token %}
+
+                    <div class="settings-section">
+                        <h3 class="settings-section-title">Display</h3>
+                        <div class="form-group">
+                            <label for="temperature_unit">Temperature Unit</label>
+                            <select id="temperature_unit" name="temperature_unit">
+                                <option value="metric" {% if user_settings.temperature_unit == 'metric' %}selected{% endif %}>Celsius (°C)</option>
+                                <option value="imperial" {% if user_settings.temperature_unit == 'imperial' %}selected{% endif %}>Fahrenheit (°F)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="dark_mode" name="dark_mode" {% if user_settings.dark_mode %}checked{% endif %}>
+                                <span>Dark Mode</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="settings-section">
+                        <h3 class="settings-section-title">Alerts</h3>
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="enable_all_alerts" name="enable_all_alerts" {% if user_settings.enable_all_alerts %}checked{% endif %}>
+                                <span>Enable all weather alerts</span>
+                            </label>
+                            <small class="form-help">When disabled, no weather alerts will be processed for your account</small>
+                        </div>
+                    </div>
+
+                    <div class="settings-actions">
+                        <button type="submit" class="submit-btn">Save Settings</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- Account Information -->
+        <section class="forecast-section">
+            <div class="forecast-card">
+                <h2 class="section-title">
+                    <svg class="title-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                        <circle cx="12" cy="7" r="4"/>
+                    </svg>
+                    Account Information
+                </h2>
+                <p class="section-subtitle">Your account details</p>
+
+                <div class="account-info">
+                    <div class="info-item">
+                        <div class="info-label">Username</div>
+                        <div class="info-value">{{ request.user.username }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Email</div>
+                        <div class="info-value">{{ request.user.email|default:"Not set" }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Member Since</div>
+                        <div class="info-value">{{ request.user.date_joined|date:"M d, Y" }}</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Last Login</div>
+                        <div class="info-value">{{ request.user.last_login|date:"M d, Y H:i" }}</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="{% static 'js/dashboard.js' %}"></script>
+</body>
+</html>
