@@ -64,6 +64,72 @@ def fetch_forecast(city: str) -> tuple[dict | None, str | None]:
     except requests.RequestException:
         return None, "Network error."
 
+def convert_temperature(temp_c: float | int | None, unit: str) -> float | None:
+    if temp_c is None:
+        return None
+    if unit == 'imperial':
+        return round((float(temp_c) * 9 / 5) + 32, 1)
+    return round(float(temp_c), 1)
+
+def build_five_day_forecast(
+    forecast: dict | None,
+    unit: str = 'metric',
+    target_hours: tuple[int, ...] = (9, 15, 21),
+) -> list[dict]:
+    """Return 5 daily forecast snapshots with multiple times per day."""
+    if not forecast:
+        return []
+
+    items = forecast.get('list', [])
+    if not items:
+        return []
+
+    tz_offset = forecast.get('city', {}).get('timezone', 0)
+    local_tz = timezone(timedelta(seconds=tz_offset))
+
+    grouped: dict[str, list[tuple[datetime, dict]]] = {}
+    for entry in items:
+        dt = entry.get('dt')
+        if not dt:
+            continue
+        dt_obj = datetime.fromtimestamp(dt, tz=local_tz)
+        date_key = dt_obj.date().isoformat()
+        grouped.setdefault(date_key, []).append((dt_obj, entry))
+
+    results: list[dict] = []
+    for date_key in sorted(grouped.keys()):
+        day_entries = grouped[date_key]
+        if not day_entries:
+            continue
+        slots: list[dict] = []
+        used_indices: set[int] = set()
+        for target_hour in target_hours:
+            ranked = sorted(
+                enumerate(day_entries),
+                key=lambda pair: (abs(pair[1][0].hour - target_hour), pair[0] in used_indices),
+            )
+            if not ranked:
+                continue
+            idx, (chosen_dt, chosen) = ranked[0]
+            used_indices.add(idx)
+            weather = chosen.get('weather', [{}])[0]
+            main = chosen.get('main', {})
+            slots.append({
+                'label': chosen_dt.strftime('%I %p').lstrip('0'),
+                'time': chosen_dt.strftime('%I:%M %p').lstrip('0'),
+                'temp': convert_temperature(main.get('temp'), unit),
+                'desc': weather.get('description', ''),
+                'icon': weather.get('icon', ''),
+            })
+        results.append({
+            'date': day_entries[0][0].strftime('%a, %b %d'),
+            'slots': slots,
+        })
+        if len(results) >= 5:
+            break
+
+    return results
+
 # --- Helper Functions for Alerts ---
 
 def alert_should_trigger(alert: AlertPreference, temp: float | None, condition_desc: str) -> tuple[bool, str]:
@@ -135,6 +201,9 @@ def dashboard(request: HttpRequest) -> HttpResponse:
     alert_form = AlertPreferenceForm()
     weather_data = None  # Key fix: Matching HTML name
     forecast_items = []
+    user_settings, _ = UserSetting.objects.get_or_create(user=request.user)
+    temp_unit = user_settings.temperature_unit
+    unit_symbol = '°F' if temp_unit == 'imperial' else '°C'
 
     # Get user history
     recent_searches = WeatherSearch.objects.filter(
@@ -172,17 +241,17 @@ def dashboard(request: HttpRequest) -> HttpResponse:
                     # Mapping to dictionary for HTML compatibility
                     weather_data = {
                         'city': new_search.city,
-                        'temperature': new_search.temperature_c,
+                        'temperature': convert_temperature(new_search.temperature_c, temp_unit),
                         'description': new_search.condition_description,
                         'icon': new_search.icon_code,
                         'humidity': new_search.humidity,
                         'wind_speed': new_search.wind_speed_kph,
-                        'feels_like': main_metrics.get('feels_like')
+                        'feels_like': convert_temperature(main_metrics.get('feels_like'), temp_unit)
                     }
                     
                     forecast, _ = fetch_forecast(city)
                     if forecast:
-                        forecast_items = forecast.get('list', [])[:6]
+                        forecast_items = build_five_day_forecast(forecast, unit=temp_unit)
                     
                     messages.success(request, f"Showing weather for {new_search.city}.")
                 else:
@@ -194,16 +263,19 @@ def dashboard(request: HttpRequest) -> HttpResponse:
         last = recent_searches.first()
         weather_data = {
             'city': last.city,
-            'temperature': last.temperature_c,
+            'temperature': convert_temperature(last.temperature_c, temp_unit),
             'description': last.condition_description,
             'icon': last.icon_code,
             'humidity': last.humidity,
             'wind_speed': last.wind_speed_kph,
-            'feels_like': last.api_payload.get('main', {}).get('feels_like') if last.api_payload else None
+            'feels_like': convert_temperature(
+                last.api_payload.get('main', {}).get('feels_like') if last.api_payload else None,
+                temp_unit,
+            )
         }
         forecast, _ = fetch_forecast(last.city)
         if forecast:
-            forecast_items = forecast.get('list', [])[:6]
+            forecast_items = build_five_day_forecast(forecast, unit=temp_unit)
 
     return render(request, 'dashboard/user_dashboard.html', {
         'form': form,
@@ -213,6 +285,7 @@ def dashboard(request: HttpRequest) -> HttpResponse:
         'recent_searches': recent_searches[:10], # Match: {% for search in recent_searches %}
         'all_alerts': AlertPreference.objects.filter(user=request.user),
         'server_time': dj_timezone.localtime(dj_timezone.now()),
+        'unit_symbol': unit_symbol,
     })
 
 # --- User Actions ---

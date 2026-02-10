@@ -155,7 +155,7 @@ git{% load static %}
                         </div>
                         <div class="weather-info">
                             <h3 class="weather-city">{{ weather_data.city|default:"City" }}</h3>
-                            <div class="weather-temp">{{ weather_data.temperature|default:"--" }}°C</div>
+                            <div class="weather-temp">{{ weather_data.temperature|default:"--" }}{{ unit_symbol }}</div>
                             <div class="weather-condition">{{ weather_data.description|title|default:"No data" }}</div>
                         </div>
                     </div>
@@ -186,11 +186,40 @@ git{% load static %}
                             </svg>
                             <div class="detail-content">
                                 <div class="detail-label">Feels Like</div>
-                                <div class="detail-value">{{ weather_data.feels_like|default:"--" }}°C</div>
+                                <div class="detail-value">{{ weather_data.feels_like|default:"--" }}{{ unit_symbol }}</div>
                             </div>
                         </div>
                     </div>
                 </div>
+
+                {% if forecast_items %}
+                <div class="five-day-forecast">
+                    <h3 class="forecast-title">5-Day Forecast</h3>
+                    <div class="forecast-days">
+                        {% for day in forecast_items %}
+                        <div class="forecast-day">
+                            <div class="forecast-date">{{ day.date }}</div>
+                            <div class="forecast-slots">
+                                {% for slot in day.slots %}
+                                <div class="forecast-slot">
+                                    <div class="forecast-time">{{ slot.label }}</div>
+                                    <div class="forecast-icon">
+                                        {% if slot.icon %}
+                                        <img src="http://openweathermap.org/img/wn/{{ slot.icon }}@2x.png" alt="Forecast icon">
+                                        {% endif %}
+                                    </div>
+                                    <div class="forecast-temp">{{ slot.temp|default:"--" }}{{ unit_symbol }}</div>
+                                    <div class="forecast-desc">{{ slot.desc|title|default:"No data" }}</div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+
                 {% else %}
                 <div class="empty-state">
                     <svg class="empty-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">

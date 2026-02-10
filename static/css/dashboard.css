@@ -495,6 +495,87 @@ body {
 }
 
 /* ============================================
+   5-DAY FORECAST
+   ============================================ */
+
+.five-day-forecast {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+}
+
+.forecast-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    color: var(--text-primary);
+}
+
+.forecast-days {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1rem;
+}
+
+.forecast-day {
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+}
+
+.forecast-date {
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 0.75rem;
+}
+
+.forecast-slots {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.75rem;
+}
+
+.forecast-slot {
+    padding: 0.75rem;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.forecast-slot:hover {
+    background: var(--bg-hover);
+    transform: translateY(-2px);
+}
+
+.forecast-time {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 0.25rem;
+}
+
+.forecast-icon img {
+    width: 48px;
+    height: 48px;
+}
+
+.forecast-temp {
+    font-size: 1.2rem;
+    font-weight: 700;
+    margin-top: 0.25rem;
+    color: var(--text-primary);
+}
+
+.forecast-desc {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+/* ============================================
    GRID LAYOUT
    ============================================ */
 
@@ -812,6 +893,14 @@ body {
     .weather-temp {
         font-size: 3rem;
     }
+
+    .forecast-days {
+        grid-template-columns: 1fr;
+    }
+
+    .forecast-slots {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
 }
 
 @media (max-width: 640px) {
@@ -831,6 +920,16 @@ body {
 
     .grid-2 {
         gap: 1.5rem;
+    }
+
+    .forecast-slots {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 480px) {
+    .forecast-slots {
+        grid-template-columns: 1fr;
     }
 }
 
