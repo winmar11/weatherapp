@@ -5,11 +5,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Dashboard | Weather App</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js">
+        const sidebarToggle = document.querySelector('.mobile-toggle');
+        const sidebarBackdrop = document.querySelector('.sidebar-backdrop');
+        const closeSidebar = () => document.body.classList.remove('sidebar-open');
+
+        if (sidebarToggle && sidebarBackdrop) {
+            sidebarToggle.addEventListener('click', () => {
+                document.body.classList.toggle('sidebar-open');
+            });
+            sidebarBackdrop.addEventListener('click', closeSidebar);
+            window.addEventListener('resize', () => {
+                if (window.innerWidth > 768) {
+                    closeSidebar();
+                }
+            });
+        }
+
+    </script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/admin_dashboard.css' %}">
 </head>
 <body>
+    <button class="mobile-toggle" aria-label="Toggle sidebar" type="button">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <line x1="3" y1="12" x2="21" y2="12"/>
+            <line x1="3" y1="6" x2="21" y2="6"/>
+            <line x1="3" y1="18" x2="21" y2="18"/>
+        </svg>
+    </button>
+    <div class="sidebar-backdrop" aria-hidden="true"></div>
+
     
 
    <aside class="sidebar">
@@ -263,6 +289,23 @@
         });
 
         document.addEventListener('DOMContentLoaded', runAnimationCycle);
+    
+        const sidebarToggle = document.querySelector('.mobile-toggle');
+        const sidebarBackdrop = document.querySelector('.sidebar-backdrop');
+        const closeSidebar = () => document.body.classList.remove('sidebar-open');
+
+        if (sidebarToggle && sidebarBackdrop) {
+            sidebarToggle.addEventListener('click', () => {
+                document.body.classList.toggle('sidebar-open');
+            });
+            sidebarBackdrop.addEventListener('click', closeSidebar);
+            window.addEventListener('resize', () => {
+                if (window.innerWidth > 768) {
+                    closeSidebar();
+                }
+            });
+        }
+
     </script>
 </body>
 </html>
