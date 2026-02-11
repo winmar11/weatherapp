@@ -13,6 +13,10 @@ services:
         value: ".onrender.com"
       - key: OPENWEATHERMAP_API_KEY
         sync: false
+      - key: ALERT_ALLOWED_USERNAMES
+        value: "marwin"
+      - key: ALERT_ALLOWED_EMAILS
+        value: "delrosariomarwin02@gmail.com"
       - key: EMAIL_HOST
         value: "smtp.gmail.com"
       - key: EMAIL_PORT
@@ -40,6 +44,10 @@ services:
         value: ".onrender.com"
       - key: OPENWEATHERMAP_API_KEY
         sync: false
+      - key: ALERT_ALLOWED_USERNAMES
+        value: "marwin"
+      - key: ALERT_ALLOWED_EMAILS
+        value: "delrosariomarwin02@gmail.com"
       - key: EMAIL_HOST
         value: "smtp.gmail.com"
       - key: EMAIL_PORT

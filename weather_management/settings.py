@@ -146,6 +146,10 @@ LOGOUT_REDIRECT_URL = 'login'
 
 OPENWEATHERMAP_API_KEY = (os.getenv('OPENWEATHERMAP_API_KEY') or '').strip()
 
+# Alert allowlist (optional, comma-separated)
+ALERT_ALLOWED_USERNAMES = [u.strip() for u in os.getenv('ALERT_ALLOWED_USERNAMES', '').split(',') if u.strip()]
+ALERT_ALLOWED_EMAILS = [e.strip().lower() for e in os.getenv('ALERT_ALLOWED_EMAILS', '').split(',') if e.strip()]
+
 # Email
 EMAIL_BACKEND = os.getenv('EMAIL_BACKEND', 'django.core.mail.backends.smtp.EmailBackend')
 EMAIL_HOST = os.getenv('EMAIL_HOST', 'smtp.gmail.com')

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.utils import timezone as dj_timezone
 
@@ -15,6 +16,10 @@ class Command(BaseCommand):
         AlertPreference.objects.filter(email_alerts=True, is_active=False).update(is_active=True)
 
         alerts = AlertPreference.objects.filter(is_active=True).select_related('user')
+        if settings.ALERT_ALLOWED_USERNAMES:
+            alerts = alerts.filter(user__username__in=settings.ALERT_ALLOWED_USERNAMES)
+        if settings.ALERT_ALLOWED_EMAILS:
+            alerts = alerts.filter(user__email__in=settings.ALERT_ALLOWED_EMAILS)
         if not alerts.exists():
             self.stdout.write("No active alerts.")
             return
