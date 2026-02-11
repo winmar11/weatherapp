@@ -29,10 +29,10 @@ if load_dotenv:
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-r(py7m7_^@2hvt4((nxg1wyi+1(rpptbr5+#3pl8z^3ktny=s+'
+SECRET_KEY = os.getenv('SECRET_KEY', 'insecure-dev-key')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', '1') == '1'
 
 ALLOWED_HOSTS = [
     'localhost',
@@ -161,11 +161,3 @@ DEFAULT_FROM_EMAIL = (os.getenv('DEFAULT_FROM_EMAIL') or EMAIL_HOST_USER).strip(
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-# EMAIL CONFIGURATION (ENABLED FOR PRODUCTION - EMAILS SENT VIA SMTP)
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'delrosariomarwin06@gmail.com'
-EMAIL_HOST_PASSWORD = 'avlveafvospbxqaq'
-DEFAULT_FROM_EMAIL = EMAIL_HOST_USER

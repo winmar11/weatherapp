@@ -1,0 +1,54 @@
+services:
+  - type: web
+    name: weather-web
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn weather_management.wsgi:application
+    envVars:
+      - key: DEBUG
+        value: "0"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALLOWED_HOSTS
+        value: ".onrender.com"
+      - key: OPENWEATHERMAP_API_KEY
+        sync: false
+      - key: EMAIL_HOST
+        value: "smtp.gmail.com"
+      - key: EMAIL_PORT
+        value: "587"
+      - key: EMAIL_USE_TLS
+        value: "1"
+      - key: EMAIL_HOST_USER
+        sync: false
+      - key: EMAIL_HOST_PASSWORD
+        sync: false
+      - key: DEFAULT_FROM_EMAIL
+        sync: false
+
+  - type: cron
+    name: weather-alerts
+    env: python
+    schedule: "*/15 * * * *"
+    command: python manage.py process_alerts
+    envVars:
+      - key: DEBUG
+        value: "0"
+      - key: SECRET_KEY
+        sync: false
+      - key: ALLOWED_HOSTS
+        value: ".onrender.com"
+      - key: OPENWEATHERMAP_API_KEY
+        sync: false
+      - key: EMAIL_HOST
+        value: "smtp.gmail.com"
+      - key: EMAIL_PORT
+        value: "587"
+      - key: EMAIL_USE_TLS
+        value: "1"
+      - key: EMAIL_HOST_USER
+        sync: false
+      - key: EMAIL_HOST_PASSWORD
+        sync: false
+      - key: DEFAULT_FROM_EMAIL
+        sync: false

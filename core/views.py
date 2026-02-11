@@ -133,18 +133,40 @@ def build_five_day_forecast(
 # --- Helper Functions for Alerts ---
 
 def alert_should_trigger(alert: AlertPreference, temp: float | None, condition_desc: str) -> tuple[bool, str]:
-    """Check if an alert should trigger based on severe weather conditions only."""
+    """Check if an alert should trigger based on temperature threshold or severe conditions."""
     if not alert.is_active:
         return False, "Alert is inactive"
 
-    # Only trigger on severe weather conditions if condition_alerts is enabled
-    if alert.condition_alerts and condition_desc:
-        # Trigger on severe weather conditions (excluding rain as it's not severe)
-        severe_conditions = ['thunderstorm', 'snow', 'mist', 'fog', 'haze', 'dust', 'sand', 'ash', 'squall', 'tornado']
-        if any(cond in condition_desc.lower() for cond in severe_conditions):
-            return True, f"Severe weather condition: {condition_desc}"
+    reasons: list[str] = []
 
-    return False, "No severe weather conditions met"
+    # Temperature threshold trigger (assumes metric/Celsius input)
+    if alert.temperature_threshold is not None:
+        if temp is None:
+            return False, "Temperature data unavailable"
+        if float(temp) >= float(alert.temperature_threshold):
+            reasons.append(f"Temperature {temp}°C reached threshold {alert.temperature_threshold}°C")
+
+    # Severe weather conditions trigger
+    if alert.condition_alerts and condition_desc:
+        severe_conditions = [
+            'thunderstorm',
+            'snow',
+            'mist',
+            'fog',
+            'haze',
+            'dust',
+            'sand',
+            'ash',
+            'squall',
+            'tornado',
+        ]
+        if any(cond in condition_desc.lower() for cond in severe_conditions):
+            reasons.append(f"Severe weather condition: {condition_desc}")
+
+    if reasons:
+        return True, " | ".join(reasons)
+
+    return False, "No alert conditions met"
 
 def send_alert_email(user, city: str, temp: float, condition: str) -> tuple[bool, str]:
     """Send alert email to user."""

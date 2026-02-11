@@ -11,6 +11,9 @@ class Command(BaseCommand):
     help = "Process active weather alerts for all users."
 
     def handle(self, *args, **options):
+        # Auto-activate any alert that opted into email alerts
+        AlertPreference.objects.filter(email_alerts=True, is_active=False).update(is_active=True)
+
         alerts = AlertPreference.objects.filter(is_active=True).select_related('user')
         if not alerts.exists():
             self.stdout.write("No active alerts.")
