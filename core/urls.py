@@ -26,6 +26,7 @@ urlpatterns = [
     path('alerts/manage/', views.manage_alerts, name='manage_alerts'),
     path('alerts/<int:alert_id>/toggle/', views.toggle_alert, name='toggle_alert'),
     path('alerts/<int:alert_id>/delete/', views.delete_alert, name='delete_alert'),
+    path('alerts/run/', views.run_alerts, name='run_alerts'),
 
     # USER SAVED LOCATIONS
     path('locations/', views.saved_locations, name='saved_locations'),

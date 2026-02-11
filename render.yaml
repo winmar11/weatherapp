@@ -17,6 +17,8 @@ services:
         value: "marwin"
       - key: ALERT_ALLOWED_EMAILS
         value: "delrosariomarwin02@gmail.com"
+      - key: ALERT_CRON_TOKEN
+        sync: false
       - key: EMAIL_HOST
         value: "smtp.gmail.com"
       - key: EMAIL_PORT
@@ -48,6 +50,8 @@ services:
         value: "marwin"
       - key: ALERT_ALLOWED_EMAILS
         value: "delrosariomarwin02@gmail.com"
+      - key: ALERT_CRON_TOKEN
+        sync: false
       - key: EMAIL_HOST
         value: "smtp.gmail.com"
       - key: EMAIL_PORT

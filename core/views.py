@@ -13,9 +13,13 @@ from django.db.models import Count
 from django.db.models.functions import TruncDate
 from django.utils import timezone as dj_timezone
 from django.core.cache import cache
-from django.http import HttpRequest, HttpResponse
+import io
+
+from django.http import HttpRequest, HttpResponse, HttpResponseForbidden, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
+from django.core.management import call_command
 
 from .forms import AlertPreferenceForm, RegisterForm, UserEditForm, WeatherSearchForm
 from .models import AlertPreference, WeatherSearch, AlertHistory, SavedLocation, UserSetting
@@ -557,3 +561,17 @@ def update_settings(request):
 
     messages.success(request, "Settings updated successfully.")
     return redirect('settings')
+
+
+@csrf_exempt
+@require_POST
+def run_alerts(request):
+    """Secure endpoint for external schedulers (GitHub Actions, cron services)."""
+    token = request.headers.get("X-Alert-Token") or request.GET.get("token", "")
+    if not django_settings.ALERT_CRON_TOKEN or token != django_settings.ALERT_CRON_TOKEN:
+        return HttpResponseForbidden("Forbidden")
+
+    buffer = io.StringIO()
+    call_command("process_alerts", stdout=buffer)
+    output = buffer.getvalue().strip()
+    return JsonResponse({"status": "ok", "output": output})

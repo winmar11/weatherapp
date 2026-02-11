@@ -1,0 +1,15 @@
+name: Alert Cron
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+
+jobs:
+  run-alerts:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call alert endpoint
+        run: |
+          curl -sS -X POST "${{ secrets.ALERT_CRON_URL }}" \
+            -H "X-Alert-Token: ${{ secrets.ALERT_CRON_TOKEN }}"
