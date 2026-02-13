@@ -2,7 +2,7 @@ name: Alert Cron
 
 on:
   schedule:
-    - cron: "*/15 * * * *"
+    - cron: "*/5 * * * *"
   workflow_dispatch:
 
 jobs:
@@ -11,5 +11,5 @@ jobs:
     steps:
       - name: Call alert endpoint
         run: |
-          curl -sS -X POST "${{ secrets.ALERT_CRON_URL }}" \
+          curl -sS --fail -X POST "${{ secrets.ALERT_CRON_URL }}" \
             -H "X-Alert-Token: ${{ secrets.ALERT_CRON_TOKEN }}"
