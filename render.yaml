@@ -39,7 +39,7 @@ services:
   - type: cron
     name: weather-alerts
     runtime: python
-    schedule: "*/15 * * * *"
+    schedule: "*/5 * * * *"
     buildCommand: pip install -r requirements.txt
     startCommand: python manage.py process_alerts
     envVars:
