@@ -1,7 +1,7 @@
 services:
   - type: web
     name: weather-web
-    env: python
+    runtime: python
     buildCommand: pip install -r requirements.txt
     startCommand: python manage.py migrate --noinput && gunicorn weather_management.wsgi:application
     envVars:
@@ -38,9 +38,10 @@ services:
 
   - type: cron
     name: weather-alerts
-    env: python
+    runtime: python
     schedule: "*/15 * * * *"
-    command: python manage.py process_alerts
+    buildCommand: pip install -r requirements.txt
+    startCommand: python manage.py process_alerts
     envVars:
       - key: DEBUG
         value: "0"
