@@ -8,8 +8,8 @@ python manage.py process_alerts
 
 echo.
 echo NOTE: This triggers the Render endpoint. Set RENDER_ALERTS_URL and RENDER_ALERTS_TOKEN below.
-set "RENDER_ALERTS_URL="
-set "RENDER_ALERTS_TOKEN="
+set "RENDER_ALERTS_URL=https://weatherapp-tmks.onrender.com/alerts/run/"
+set "RENDER_ALERTS_TOKEN=mysecret12345"
 
 if "%RENDER_ALERTS_URL%"=="" (
   echo Skipping Render call: RENDER_ALERTS_URL not set.
