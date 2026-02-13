@@ -85,7 +85,7 @@ class UserSetting(models.Model):
     )
     temperature_unit = models.CharField(
         max_length=10,
-        choices=[('metric', 'Celsius (°C)'), ('imperial', 'Fahrenheit (°F)')],
+        choices=[('metric', 'Celsius (C)'), ('imperial', 'Fahrenheit (F)')],
         default='metric'
     )
     dark_mode = models.BooleanField(default=True)

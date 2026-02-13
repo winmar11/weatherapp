@@ -148,7 +148,7 @@ def alert_should_trigger(alert: AlertPreference, temp: float | None, condition_d
         if temp is None:
             return False, "Temperature data unavailable"
         if float(temp) >= float(alert.temperature_threshold):
-            reasons.append(f"Temperature {temp}°C reached threshold {alert.temperature_threshold}°C")
+            reasons.append(f"Temperature {temp}C reached threshold {alert.temperature_threshold}C")
 
     # Severe weather conditions trigger
     if alert.condition_alerts and condition_desc:
@@ -176,15 +176,15 @@ def send_alert_email(user, city: str, temp: float, condition: str) -> tuple[bool
     """Send alert email to user."""
     try:
         subject = f"Weather Alert for {city}"
-        message = f"""
-        Weather Alert Triggered!
-
-        Location: {city}
-        Temperature: {temp}°C
-        Condition: {condition}
-
-        This is an automated alert from Weather Forecast.
-        """
+        message = "\n".join([
+            "Weather Alert Triggered!",
+            "",
+            f"Location: {city}",
+            f"Temperature: {temp}C",
+            f"Condition: {condition}",
+            "",
+            "This is an automated alert from Weather Forecast.",
+        ])
         send_mail(
             subject,
             message,
@@ -229,7 +229,7 @@ def dashboard(request: HttpRequest) -> HttpResponse:
     forecast_items = []
     user_settings, _ = UserSetting.objects.get_or_create(user=request.user)
     temp_unit = user_settings.temperature_unit
-    unit_symbol = '°F' if temp_unit == 'imperial' else '°C'
+    unit_symbol = 'F' if temp_unit == 'imperial' else 'C'
 
     # Get user history
     recent_searches = WeatherSearch.objects.filter(
