@@ -161,6 +161,7 @@ EMAIL_USE_TLS = os.getenv('EMAIL_USE_TLS', '1') == '1'
 EMAIL_HOST_USER = (os.getenv('EMAIL_HOST_USER') or '').strip()
 EMAIL_HOST_PASSWORD = (os.getenv('EMAIL_HOST_PASSWORD') or '').strip()
 DEFAULT_FROM_EMAIL = (os.getenv('DEFAULT_FROM_EMAIL') or EMAIL_HOST_USER).strip()
+EMAIL_TIMEOUT = int(os.getenv('EMAIL_TIMEOUT', '10'))
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
